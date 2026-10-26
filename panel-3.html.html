@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#091523"><title>Fútbol Analytics PRO 3.1</title>
+<style>
+:root{font-family:system-ui,-apple-system,Arial,sans-serif;color:#edf5ff;background:#08131f;--panel:#112437;--line:#2c4255;--green:#51e1ac;--muted:#9cb2c5}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 90% 0,#17435b,transparent 40%),#08131f;min-height:100vh}
+header{position:sticky;top:0;z-index:2;background:#0b1b2be8;border-bottom:1px solid var(--line);backdrop-filter:blur(9px)}
+nav{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px}
+.logo{font-size:19px;font-weight:800}.logo span{color:var(--green)}a{color:#9bd5ff}
+.tag{border:1px solid #367367;color:#b9ffe5;border-radius:30px;padding:6px 11px;font-size:12px}
+main{max-width:1200px;margin:auto;padding:26px 16px 50px}h1{font-size:clamp(27px,4vw,42px);margin:7px 0}p{line-height:1.55}
+.muted{color:var(--muted)}.panel{background:linear-gradient(150deg,#14283a,#102031);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:17px}
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end}.field label{display:block;font-size:12px;color:#aec2d4;margin-bottom:7px}
+input,select{width:100%;background:#071624;border:1px solid #395468;border-radius:9px;color:white;padding:12px;font-size:14px}
+button{border:0;cursor:pointer;border-radius:10px;background:var(--green);color:#07291f;padding:13px 17px;font-weight:800;font-size:14px}button:disabled{opacity:.55;cursor:default}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.kpi{background:#0d1e2e;border:1px solid var(--line);border-radius:12px;padding:15px}.kpi strong{display:block;font-size:26px}.kpi small{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:16px}
+.card{border:1px solid #2d4a5e;border-radius:13px;background:#0e2131;padding:18px}
+.hd{display:flex;justify-content:space-between;gap:8px;color:#9dc4d4;font-size:12px}.teams{font-size:19px;font-weight:800;margin:12px 0}.prob{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.prob div{border:1px solid #365165;background:#132e42;padding:10px 4px;text-align:center;border-radius:9px}.prob b{display:block;font-size:23px}.prob small{color:#abc6d5}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.tags span{border-radius:6px;background:#1c4051;color:#bbeadf;padding:7px;font-size:12px}
+.actions{margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}.actions a{font-size:13px}
+.warning{font-size:12px;color:#b8c9d6;margin-top:20px}
+@media(max-width:800px){.controls{grid-template-columns:1fr 1fr}.cards{grid-template-columns:1fr}}
+@media(max-width:500px){.controls{grid-template-columns:1fr}.kpis{gap:6px}.kpi{padding:10px}.kpi strong{font-size:21px}}
+.detail{margin-top:18px;border:1px solid #367667;background:#102b37;border-radius:15px;padding:20px}.detail[hidden]{display:none}.detail h2{margin-top:0}.detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.detail-grid>div{background:#0b1d2d;border:1px solid #2f5362;border-radius:10px;padding:14px;text-align:center}.detail-grid strong{display:block;font-size:25px}.detail-grid small{color:#a6c0ce}.btn-secondary{background:#1b3d50;color:#e1f7ff;border:1px solid #3c6474}.badge{font-size:12px;border-radius:7px;background:#244954;padding:6px;color:#d0f6e6}.notice{color:#bfd1df;font-size:12px;line-height:1.5}@media(max-width:500px){.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header><nav><div class="logo">⚽ FÚTBOL <span>ANALYTICS</span></div><div class="tag">PRO 3.1</div></nav></header>
+<main>
+<h1>Partidos y pronósticos del día</h1>
+<p class="muted">Panel de múltiples ligas con resultados históricos de Football-Data.org y probabilidades estimadas mediante Poisson.</p>
+<section class="panel">
+<div class="controls">
+ <div class="field"><label for="date">Fecha de partidos (Chile)</label><input id="date" type="date"></div>
+ <div class="field"><label for="league">Competición</label><select id="league"><option value="all">Todas las ligas</option><option value="PL">Premier League</option><option value="PD">LaLiga</option><option value="BL1">Bundesliga</option><option value="SA">Serie A</option><option value="FL1">Ligue 1</option><option value="CL">Champions League</option><option value="PPL">Portugal</option><option value="DED">Países Bajos</option></select></div>
+ <div class="field"><label for="sort">Ordenar</label><select id="sort"><option value="time">Por hora</option><option value="confidence">Mayor probabilidad</option><option value="league">Por competición</option></select></div>
+ <button id="go">🔄 Buscar partidos</button>
+</div>
+<div class="kpis"><div class="kpi"><strong id="total">—</strong><small>Partidos</small></div><div class="kpi"><strong id="analysed">—</strong><small>Con pronóstico</small></div><div class="kpi"><strong id="count">—</strong><small>Ligas con partidos</small></div></div>
+<p id="status" class="muted" role="status">Selecciona una fecha y pulsa «Buscar partidos».</p>
+</section>
+<section id="cards" class="cards"></section><section id="detail" class="detail" hidden tabindex="-1"><h2 id="detailTitle">Análisis detallado</h2><p id="detailMeta" class="muted"></p><div id="detailGrid" class="detail-grid"></div><p class="notice">Resultados estimados a partir de Poisson independiente y goles recientes; las muestras pequeñas aumentan la incertidumbre. La categoría de confianza indica cantidad de datos, no precisión predictiva verificada.</p><button id="closeDetail" class="btn-secondary" type="button">Cerrar análisis</button></section>
+<p class="warning">Los porcentajes son estimaciones exploratorias, no resultados garantizados. Los goles esperados aquí son aproximaciones basadas en marcadores recientes, no xG reales. Cada liga puede estar limitada por el plan de datos o por el número de solicitudes permitido. <a href="./">Volver al Dashboard 2.0</a>.</p>
+</main>
+<script>
+'use strict';
+const $=x=>document.getElementById(x),names={PL:'Premier League',PD:'LaLiga',BL1:'Bundesliga',SA:'Serie A',FL1:'Ligue 1',CL:'Champions League',PPL:'Portugal',DED:'Países Bajos'};
+const codes=Object.keys(names),fact=[1];for(let i=1;i<45;i++)fact.push(fact[i-1]*i);
+const ps=(k,l)=>Math.exp(-l)*Math.pow(l,k)/fact[k],pct=x=>(x*100).toFixed(1)+'%';
+let games=[];
+const el=(tag,text,cl)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;if(cl)x.className=cl;return x};
+function probs(a,b){if(!Number.isFinite(a)||!Number.isFinite(b)||a<=0||b<=0)return null;let h=0,d=0,v=0;
+ for(let x=0;x<35;x++)for(let y=0;y<35;y++){const z=ps(x,a)*ps(y,b);if(x>y)h+=z;else if(x===y)d+=z;else v+=z}
+ const t=a+b,under=Math.exp(-t)*(1+t+t*t/2),both=(1-Math.exp(-a))*(1-Math.exp(-b));
+ return {h,d,v,over:1-under,both,dc1x:h+d,dcx2:d+v,dc12:h+v};}
+function render(){
+ const league=$('league').value,sort=$('sort').value;
+ const rows=games.filter(x=>league==='all'||x.league===league);
+ rows.sort((a,b)=>sort==='league'?names[a.league].localeCompare(names[b.league])||a.utcDate.localeCompare(b.utcDate):sort==='confidence'?Math.max(...(b.p?[b.p.h,b.p.d,b.p.v]:[0]))-Math.max(...(a.p?[a.p.h,a.p.d,a.p.v]:[0]))||a.utcDate.localeCompare(b.utcDate):a.utcDate.localeCompare(b.utcDate));
+ $('total').textContent=rows.length;$('analysed').textContent=rows.filter(x=>x.p).length;$('count').textContent=new Set(rows.map(x=>x.league)).size;
+ $('cards').replaceChildren();
+ for(const m of rows){const box=el('article',undefined,'card'),hd=el('div',undefined,'hd');
+ hd.append(el('span',names[m.league]),el('span',new Date(m.utcDate).toLocaleString('es-CL',{timeZone:'America/Santiago',hour:'2-digit',minute:'2-digit'})+' · '+m.status));box.append(hd,el('div',m.homeName+' vs '+m.awayName,'teams'));
+ if(m.p){const prob=el('div',undefined,'prob');for(const [n,x] of [['1 · Local',m.p.h],['X · Empate',m.p.d],['2 · Visita',m.p.v]]){const c=el('div');c.append(el('b',pct(x)),el('small',n));prob.append(c)}box.append(prob);
+ const tags=el('div',undefined,'tags');for(const t of ['Más 2.5: '+pct(m.p.over),'Ambos marcan: '+pct(m.p.both),'Historial: '+m.homeGames+'/'+m.awayGames])tags.append(el('span',t));tags.append(el('span','Doble oportunidad 1X: '+pct(m.p.dc1x)));tags.append(el('span','Confianza de datos: '+(Math.min(m.homeGames,m.awayGames)>=8?'Mayor':Math.min(m.homeGames,m.awayGames)>=5?'Media':'Limitada')));box.append(tags);
+ }else box.append(el('p','Historial insuficiente para calcular probabilidades confiables.','muted'));
+ const actions=el('div',undefined,'actions');actions.append(el('span','Fuente: football-data.org','muted'));const link=el('button','Ver análisis detallado','btn-secondary');link.type='button';link.disabled=!m.p;link.addEventListener('click',()=>showDetail(m));actions.append(link);box.append(actions);$('cards').append(box);}
+ if(!rows.length)$('cards').append(el('p','No hay partidos con los filtros seleccionados.','muted'));
+}
+function showDetail(m){if(!m.p)return;const a=m.xh,b=m.xa,p=m.p;const section=$('detail');$('detailTitle').textContent=m.homeName+' vs '+m.awayName;$('detailMeta').textContent=names[m.league]+' · '+new Date(m.utcDate).toLocaleString('es-CL',{timeZone:'America/Santiago',dateStyle:'medium',timeStyle:'short'})+' · Historial: '+m.homeGames+' y '+m.awayGames+' partidos';const data=[['Victoria local',pct(p.h)],['Empate',pct(p.d)],['Victoria visitante',pct(p.v)],['1X · Local o empate',pct(p.dc1x)],['X2 · Empate o visita',pct(p.dcx2)],['12 · Sin empate',pct(p.dc12)],['Más de 2.5 goles',pct(p.over)],['Ambos anotan',pct(p.both)],['Goles estimados local',a.toFixed(2)],['Goles estimados visita',b.toFixed(2)]];$('detailGrid').replaceChildren();for(const [name,val] of data){const c=el('div');c.append(el('strong',val),el('small',name));$('detailGrid').append(c)}section.hidden=false;section.scrollIntoView({behavior:'smooth',block:'start'});section.focus({preventScroll:true})}
+$('closeDetail').addEventListener('click',()=>{$('detail').hidden=true});
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+async function load(){
+ const date=$('date').value;if(!date){$('status').textContent='Selecciona una fecha.';return}
+ $('go').disabled=true;games=[];let errors=[];$('cards').replaceChildren();const targets=$('league').value==='all'?codes:[$('league').value];
+ try{for(let i=0;i<targets.length;i++){const code=targets[i];$('status').textContent='Consultando '+names[code]+' ('+(i+1)+'/'+targets.length+')…';
+ try{const resp=await fetch('/.netlify/functions/partidos?date='+encodeURIComponent(date)+'&league='+encodeURIComponent(code));
+ const obj=await resp.json();if(!resp.ok)throw Error(obj.error||'Error '+resp.status);
+ for(const m of (obj.matches||[]))games.push({...m,league:code,p:probs(m.xh,m.xa)});
+ }catch(err){errors.push(names[code]+': '+err.message)}render();if(i+1<targets.length)await delay(1500)}
+ $('status').textContent=errors.length?'Consulta terminada; '+errors.length+' liga(s) no respondieron. '+errors.slice(0,2).join(' | '):'Consulta completada. Datos de Football-Data.org.';
+ }finally{$('go').disabled=false}
+}
+$('date').value=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Santiago',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+$('go').addEventListener('click',load);$('league').addEventListener('change',render);$('sort').addEventListener('change',render);
+</script></body></html>
